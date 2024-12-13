@@ -17,7 +17,7 @@ NUM '\d+'
 
 # Semantic specification
 #
-# Add a `toString` method to the `Lon` class
+#
 Lon
 %%%
     public void $run() {
@@ -27,7 +27,7 @@ Lon
 
     public int min() {
         int minSoFar = Integer.parseInt(num.toString());
-        return nums.min(minSoFar); // Get the overall minimum.
+        return nums.min(minSoFar);
     }
 %%%
 
@@ -39,13 +39,15 @@ Nums
 NumsNode
 %%%
     public int min(int minSoFar) {
-        return 0; // This is just a stub. Replace it with your implementation.
+        int next = Integer.parseInt(num.toString());
+        minSoFar = Math.min(minSoFar, next);
+        return nums.min(minSoFar); 
     }
 %%%
 
 NumsNull
 %%%
     public int min(int minSoFar) {
-        return 0; // This is just a stub. Replace it with your implementation.
+        return minSoFar;
     }
 %%%

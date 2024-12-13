@@ -4,6 +4,7 @@ import java.util.*;
 
 public abstract class Ref {
 
+  // Convert list of values to list of ValRefs
   public static List<Ref> valsToRefs(List<Val> valList) {
     List<Ref> refList = new ArrayList<Ref>();
     for (Val v : valList)
@@ -11,8 +12,14 @@ public abstract class Ref {
     return refList;
   }
 
+  // Abstract methods for de-referencing and setting references
   public abstract Val deRef();
   public abstract Val setRef(Val v);
+
+  // Default copyOut method does nothing
+  public void copyOut() {
+    // No-op for ValRef
+  }
 }
 
 %%%
@@ -36,6 +43,40 @@ public class ValRef extends Ref {
     return val = v;
   }
 
+  // No copy-out needed for direct value references
+  @Override
+  public void copyOut() {
+    // No-op
+  }
+}
+
+%%%
+
+VarRef
+%%%
+
+public class VarRef extends Ref {
+
+  public Val val; // Local copy for copy-in
+  public Ref ref; // Reference for copy-out
+
+  public VarRef(Ref ref) {
+    this.val = ref.deRef(); // Copy-in: make a local copy of the value
+    this.ref = ref;         // Store the original reference for copy-out
+  }
+
+  public Val deRef() {
+    return val;
+  }
+
+  public Val setRef(Val v) {
+    return val = v;
+  }
+
+  @Override
+  public void copyOut() {
+    ref.setRef(val); // Copy-out: write back the modified value
+  }
 }
 
 %%%

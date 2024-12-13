@@ -4,19 +4,23 @@ import java.util.*;
 
 public abstract class Val {
 
-  public static Val [] toArray(List<Val> valList) {
+  // Convert list of Val objects to an array
+  public static Val[] toArray(List<Val> valList) {
     int n = valList.size();
     return valList.toArray(new Val[n]);
   }
 
+  // Default apply method (throws error for non-procedure values)
   public Val apply(List<Ref> refList) {
     throw new RuntimeException("cannot apply " + this);
   }
 
+  // Default truthiness check (override as needed)
   public boolean isTrue() {
-    return true; // everything is true except for an IntVal of zero
+    return true; // Everything is true except an IntVal of zero
   }
 
+  // Helper methods for type casting
   public IntVal intVal() {
     throw new RuntimeException(this + ": not an Int");
   }
@@ -24,8 +28,8 @@ public abstract class Val {
   public ProcVal procVal() {
     throw new RuntimeException(this + ": not a Proc");
   }
-
 }
+
 %%%
 
 IntVal
@@ -44,19 +48,22 @@ public class IntVal extends Val {
     val = v;
   }
 
+  @Override
   public IntVal intVal() {
     return this;
   }
 
+  @Override
   public boolean isTrue() {
     return val != 0;
   }
 
+  @Override
   public String toString() {
     return "" + val;
   }
-
 }
+
 %%%
 
 ProcVal
@@ -65,9 +72,9 @@ import java.util.*;
 
 public class ProcVal extends Val {
 
-  public Formals formals;
-  public Exp body;
-  public Env env;
+  public Formals formals; // Formal parameters
+  public Exp body;        // Body of the procedure
+  public Env env;         // Environment where the procedure was created
 
   public ProcVal(Formals formals, Exp body, Env env) {
     this.formals = formals;
@@ -75,19 +82,32 @@ public class ProcVal extends Val {
     this.env = env;
   }
 
+  @Override
   public Val apply(List<Ref> refList) {
+    // Bind the formal parameters to the provided references
     Bindings bindings = new Bindings(formals.varList, refList);
     Env nenv = env.extendEnvRef(bindings);
-    return body.eval(nenv);
+
+    // Evaluate the procedure body
+    Val result = body.eval(nenv);
+
+    // Copy-out phase: update the actual parameters
+    for (Ref ref : refList) {
+      ref.copyOut();
+    }
+
+    return result;
   }
 
+  @Override
   public ProcVal procVal() {
     return this;
   }
 
+  @Override
   public String toString() {
     return "proc";
   }
-
 }
+
 %%%
